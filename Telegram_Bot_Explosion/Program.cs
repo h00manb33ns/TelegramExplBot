@@ -4,20 +4,33 @@ using System.IO;
 using System.Text;
 using System.Drawing.Imaging;
 using Telegram.Bot;
-using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InputFiles;
 
 namespace Telegram_Bot_Explosion
 {
     class Program
-    {
+    { 
         static void Main(string[] args)
         {
             StartBot();
         }
 
-        static ITelegramBotClient bot = new TelegramBotClient("5634788754:AAGr1z0SWHyoFYgh5RP-DNHBh6MHPR6fqBY");
+        private static string GetToken()
+        {
+            using (FileStream fstream = System.IO.File.OpenRead("token"))
+            {
+                byte[] buffer = new byte[fstream.Length];
+                fstream.Read(buffer, 0, buffer.Length);
+                return Encoding.Default.GetString(buffer);
+            }
+        }
+
+        private static readonly string token = GetToken();
+        
+
+        static ITelegramBotClient bot = new TelegramBotClient(token);
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             Console.WriteLine("Пришло новое сообщение.");
@@ -47,6 +60,7 @@ namespace Telegram_Bot_Explosion
 
         public static async void FileHandlerExpl(Message message, ITelegramBotClient botClient)
         {
+            Console.WriteLine(message.Photo.Length);
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(message.From.FirstName + " отправил фото."));
             string photoName = message.Photo[message.Photo.Length - 1].FileId;
             var file = await bot.GetFileAsync(photoName);
@@ -92,7 +106,7 @@ namespace Telegram_Bot_Explosion
                 receiverOptions,
                 cancellationToken
             );
-            Console.ReadKey();
+            Console.Read();
         }
 
         public static void MakeExplMp4(string photoName)
